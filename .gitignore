@@ -1,2 +1,3 @@
-CBCT/
+*.tiff
+*.png
 *.pyc

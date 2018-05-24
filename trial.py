@@ -2,7 +2,7 @@
 # @Author: Saurabh Agarwal
 # @Date:   2018-05-14 03:17:00
 # @Last Modified by:   Saurabh Agarwal
-# @Last Modified time: 2018-05-24 10:32:51
+# @Last Modified time: 2018-05-24 15:32:35
 import tensorflow as tf
 import numpy as np
 import unet
@@ -37,7 +37,7 @@ secondLayer = tf.minimum(firstLayer, highThresh)
 # Need to convert it into binary form
 # predict = tf.multiply(firstLayer, secondLayer)
 training = tf.placeholder(tf.bool)
-predict = unet.make_unet(x, training)
+predict = unet.make_unet(x, training, unet.read_flags())
 
 cost = tf.reduce_mean(tf.squared_difference(predict,y))
 learningrate = 0.01
