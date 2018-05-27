@@ -23,12 +23,13 @@ Notes:
     not labeled for segmentations
 
 Original Paper:
-    https:
+    https://arxiv.org/abs/1505.04597
 """
 import time
 import os
 import pandas as pd
 import tensorflow as tf
+
 
 def image_augmentation(image, mask):
     """Returns (maybe) augmented images
@@ -58,6 +59,7 @@ def image_augmentation(image, mask):
     image = tf.image.random_hue(image, 0.3)
 
     return image, mask
+
 
 def get_image_mask(queue, augmentation=True):
     """Returns `image` and `mask`
@@ -101,6 +103,7 @@ def get_image_mask(queue, augmentation=True):
         image, mask = image_augmentation(image, mask)
 
     return image, mask
+
 
 def conv_conv_pool(input_,
                    n_filters,
@@ -146,6 +149,7 @@ def conv_conv_pool(input_,
 
         return net, pool
 
+
 def upconv_concat(inputA, input_B, n_filter, flags, name):
     """Upsample `inputA` and concat with `input_B`
 
@@ -161,6 +165,7 @@ def upconv_concat(inputA, input_B, n_filter, flags, name):
 
     return tf.concat(
         [up_conv, input_B], axis=-1, name="concat_{}".format(name))
+
 
 def upconv_2D(tensor, n_filter, flags, name):
     """Up Convolution `tensor` by 2 times
@@ -182,6 +187,7 @@ def upconv_2D(tensor, n_filter, flags, name):
         kernel_regularizer=tf.contrib.layers.l2_regularizer(flags.reg),
         name="upsample_{}".format(name))
 
+
 def make_unet(X, training, flags=None):
     """Build a U-Net architecture
 
@@ -195,7 +201,7 @@ def make_unet(X, training, flags=None):
 
     Notes:
         U-Net: Convolutional Networks for Biomedical Image Segmentation
-        https:
+        https://arxiv.org/abs/1505.04597
     """
     net = X / 127.5 - 1
     conv1, pool1 = conv_conv_pool(net, [8, 8], training, flags, name=1)
@@ -224,6 +230,7 @@ def make_unet(X, training, flags=None):
         activation=tf.nn.sigmoid,
         padding='same')
 
+
 def IOU_(y_pred, y_true):
     """Returns a (approx) IOU score
 
@@ -248,6 +255,7 @@ def IOU_(y_pred, y_true):
             true_flat, axis=1) + 1e-7
 
     return tf.reduce_mean(intersection / denominator)
+
 
 def make_train_op(y_pred, y_true):
     """Returns a training operation
@@ -274,6 +282,7 @@ def make_train_op(y_pred, y_true):
     optim = tf.train.AdamOptimizer()
     return optim.minimize(loss, global_step=global_step)
 
+
 def read_flags():
     """Returns flags"""
 
@@ -297,6 +306,7 @@ def read_flags():
 
     flags = parser.parse_args()
     return flags
+
 
 def main(flags):
     train = pd.read_csv("./train.csv")
@@ -413,6 +423,7 @@ def main(flags):
             coord.request_stop()
             coord.join(threads)
             saver.save(sess, "{}/model.ckpt".format(flags.ckdir))
+
 
 if __name__ == '__main__':
     flags = read_flags()

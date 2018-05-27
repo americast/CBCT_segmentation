@@ -8,18 +8,21 @@ import numpy as np
 import unet
 from PIL import Image
 import numpy as np
+from skimage import io
+import data
 
+BATCH_SIZE = 10
 minValue = np.array([1.0000],dtype=np.float32)
 maxValue = np.array([9.0],dtype=np.float32)
 
 # Correct Range = (3,6)
 # Output Function = (input-low)*(high-input)
 # For values in between given range
-inputValue = [[1,2,3],[4,5,6],[7,8,9]]
-outputValue = [[4,4,4],[4,5,5],[5,5,5]]
+# inputValue = [[1,2,3],[4,5,6],[7,8,9]]
+# outputValue = [[4,4,4],[4,5,5],[5,5,5]]
 
-x = tf.placeholder(tf.float32, shape=[3,3])
-y = tf.placeholder(tf.float32,shape=[3,3])
+x = tf.placeholder(tf.float32, shape=[10, 1, 245,384])
+y = tf.placeholder(tf.float32, shape=[10, 1, 245,384])
 
 
 zeros = tf.zeros(shape=[3,3])
@@ -45,23 +48,27 @@ train = tf.train.AdamOptimizer(learningrate).minimize(cost)
 
 init = tf.global_variables_initializer()
 numepochs = 1000
-
+C = 0.0
 with tf.Session() as sess:
 	sess.run(init)
 	for i in xrange(numepochs):
-		_, lowValue, highValue, c = sess.run([train, lowThresh, highThresh, cost], feed_dict={
-			x: inputValue,
-			y: outputValue,
+		for j in 109/BATCH_SIZE:
+			inputValue, outputValue = data.data_in_batches().next()
+			print("jfiejfierfukjferf: "+str(inputValue.shape))
+			_, lowValue, highValue, c = sess.run([train, lowThresh, highThresh, cost], feed_dict={
+				x: inputValue,
+				y: outputValue,
+				training: True
+				})
+			print(lowValue[0], highValue[0],c)
+
+		lowValue, highValue, pred, c = sess.run([lowThresh,highThresh, predict, cost], feed_dict={
+			x:inputValue,
+			y:outputValue,
 			training: True
 			})
-		print(lowValue[0], highValue[0],c)
+		print "Range -> ({},{})".format(lowValue[0], highValue[0])
+		print "Predicted Output: {}".format(pred)
+		C+=c
 
-	lowValue, highValue, pred, c = sess.run([lowThresh,highThresh, predict, cost], feed_dict={
-		x:inputValue,
-		y:outputValue,
-		training: True
-		})
-	print "Range -> ({},{})".format(lowValue[0], highValue[0])
-	print "Predicted Output: {}".format(pred)
-	print "Cost: {}".format(c)
-
+print "Cost: {}".format(c/(109.0/BATCH_SIZE))

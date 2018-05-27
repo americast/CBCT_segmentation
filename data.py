@@ -8,23 +8,42 @@ import os
 import glob
 import numpy as np
 
-XPath = os.path.join(".","CBCT/Data/X")
-YPath = os.path.join(".","CBCT/Data/Y")
+BATCH_SIZE = 10
 
-XFileName = glob.glob(os.path.join(XPath,"*.tiff"))
-YFileName = glob.glob(os.path.join(YPath,"*.tiff"))
+def data_in_batches():
+	XPath = os.path.join(".","data/X")
+	YPath = os.path.join(".","data/Y")
 
-x = []
-y = []
-for file in XFileName[:10]:
-	x.append(io.imread(file))
+	XFileName = glob.glob(os.path.join(XPath,"*.tiff"))
+	YFileName = glob.glob(os.path.join(YPath,"*.tiff"))
 
-x = np.asarray(x)
-print(x.shape)
+	x = []
+	y = []
+	for file in XFileName:
+		# print file
+		x.extend(io.imread(file))
+		# print len(x)
+		# print shape(x)
+	x = np.asarray(x)
+	x = np.reshape(x, [x.shape[0],1,x.shape[1], x.shape[2]])
+	print(x.shape)
 
-for file in YFileName[:10]:
-	y.append(io.imread(file))
+	for file in YFileName:
+		# print file
+		y.extend(io.imread(file))
+		# print len(x)
+		# print shape(x)
+	y = np.asarray(y)
+	y = np.reshape(y, [y.shape[0],1,y.shape[1], y.shape[2]])
+	print(y.shape)
 
-y = np.asarray(y)
+	indices = np.random.permutation(x.shape[0])
+	print(indices)
 
-print(x.shape, y.shape)
+	x = x[indices]
+	y = y[indices]
+
+	count = 0
+	for i in x.shape[0]/BATCH_SIZE:
+		yield (x[count:count+BATCH_SIZE], y[count:count+BATCH_SIZE])
+		count+=BATCH_SIZE
