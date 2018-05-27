@@ -2,7 +2,7 @@
 # @Author: Saurabh Agarwal
 # @Date:   2018-05-24 10:39:32
 # @Last Modified by:   Saurabh Agarwal
-# @Last Modified time: 2018-05-24 15:27:48
+# @Last Modified time: 2018-05-28 02:55:14
 from skimage import io
 import os
 import glob
@@ -19,6 +19,7 @@ def data_in_batches():
 
 	x = []
 	y = []
+	print(len(XFileName))
 	for file in XFileName:
 		# print file
 		x.extend(io.imread(file))
@@ -26,6 +27,9 @@ def data_in_batches():
 		# print shape(x)
 	x = np.asarray(x)
 	x = np.reshape(x, [x.shape[0],1,x.shape[1], x.shape[2]])
+
+	X = np.append(x,x,axis=1)
+	X = np.append(X,x,axis=1)
 	print(x.shape)
 
 	for file in YFileName:
